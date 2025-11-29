@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="30">
+    <title>Album: {{ album_name }}</title>
+    <style>
+        body { margin: 0; padding: 20px; background-color: #000; color: #fff; font-family: sans-serif; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #333; }
+        a { color: #aaa; text-decoration: none; }
+        
+        /* Upload Form */
+        .upload-area { text-align: center; margin-bottom: 20px; background: #222; padding: 15px; border-radius: 8px; }
+        
+        /* Gallery Grid */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .photo-item {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 5px;
+            aspect-ratio: 1 / 1; /* Giữ khung vuông ở chế độ xem lưới cho gọn */
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cắt ảnh để vừa ô vuông thumbnail */
+            transition: transform 0.3s;
+        }
+        .photo-item:hover img { transform: scale(1.1); }
+
+        /* MODAL (Xem chi tiết ảnh full HD) */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 999; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.95); 
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Ảnh trong modal: Quan trọng để giữ đúng tỉ lệ gốc */
+        .modal-content {
+            max-width: 95%;
+            max-height: 95vh;
+            object-fit: contain; /* Đảm bảo thấy toàn bộ ảnh, không bị méo/cắt */
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .close {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <a href="{{ url_for('home') }}">← Quay lại danh sách</a>
+            <h1>Album: {{ album_name }}</h1>
+        </div>
+    </header>
+
+    <div class="upload-area">
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="files[]" accept="image/*" multiple required>
+            <button type="submit" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Tải ảnh lên</button>
+        </form>
+    </div>
+
+    <div class="gallery">
+        {% for image in images %}
+            <div class="photo-item" 
+     data-src="{{ url_for('static', filename='uploads/' + album_name + '/' + image) }}"
+     onclick="openModal(this.getAttribute('data-src'))">
+    
+    <img src="{{ url_for('static', filename='uploads/' + album_name + '/' + image) }}" loading="lazy">
+</div>
+        {% endfor %}
+    </div>
+
+    <div id="myModal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+
+    <script>
+        // Hàm mở modal xem ảnh
+        function openModal(src) {
+            var modal = document.getElementById("myModal");
+            var modalImg = document.getElementById("img01");
+            modal.style.display = "flex";
+            modalImg.src = src;
+        }
+
+        // Hàm đóng modal
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none";
+        }
+
+        // Đóng khi ấn ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
